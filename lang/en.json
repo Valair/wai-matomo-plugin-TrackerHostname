@@ -1,0 +1,6 @@
+{
+    "TrackerHostname": {
+        "TrackerURLTitle": "Public URL of the tracker",
+        "TrackerURLDescription": "Full public URL of the tracker for analytics data ingestion"
+    }
+}
