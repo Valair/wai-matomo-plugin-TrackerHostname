@@ -7,7 +7,7 @@ Javascript tracking code and image tracking link.
 
 ## Installation
 
-Refer to [this Matamo FAQ](https://matomo.org/faq/plugins/faq_21/).
+Refer to [this Matomo FAQ](https://matomo.org/faq/plugins/faq_21/).
 
 ## Usage
 
