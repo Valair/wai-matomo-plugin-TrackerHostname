@@ -1,0 +1,56 @@
+name: Add asset to release
+
+on:
+  release:
+    types: [published]
+env:
+  DIST_FOLDER: dist/
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Set env variables
+        run: |
+          echo ::set-env name=RELEASE_TAG::$(echo ${{ github.ref }} | cut -c11-)
+          echo ::set-env name=PLUGIN_NAME::$(echo $( jq -r '.name' ${{ github.workspace }}/plugin.json ))
+          echo ::set-env name=ASSET_UPLOAD_URL::$(echo $( jq -r '.release.upload_url' $GITHUB_EVENT_PATH ))
+      - name: Prepare distribution files
+        run: |
+          mkdir -p $DIST_FOLDER/$PLUGIN_NAME
+          cp -r config $DIST_FOLDER/$PLUGIN_NAME
+          cp -r lang $DIST_FOLDER/$PLUGIN_NAME
+          cp *.php $DIST_FOLDER/$PLUGIN_NAME
+          cp plugin.json $DIST_FOLDER/$PLUGIN_NAME
+      - name: Prepare archives
+        run: |
+          cd ${{ github.workspace }}/$DIST_FOLDER
+          zip -r $PLUGIN_NAME-$RELEASE_TAG.zip $PLUGIN_NAME
+          tar -czvf $PLUGIN_NAME-$RELEASE_TAG.tar.gz $PLUGIN_NAME
+      - name: Prepare inputs for asset upload
+        id: args
+        run: |
+          echo ::set-output name=asset_upload_url::$ASSET_UPLOAD_URL
+          echo ::set-output name=asset_path_zip::${{ github.workspace }}/$DIST_FOLDER/$PLUGIN_NAME-$RELEASE_TAG.zip
+          echo ::set-output name=asset_name_zip::$PLUGIN_NAME-$RELEASE_TAG.zip
+          echo ::set-output name=asset_path_tar::${{ github.workspace }}/$DIST_FOLDER/$PLUGIN_NAME-$RELEASE_TAG.tar.gz
+          echo ::set-output name=asset_name_tar::$PLUGIN_NAME-$RELEASE_TAG.tar.gz
+      - name: Upload ZIP asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.args.outputs.asset_upload_url }}
+          asset_path: ${{ steps.args.outputs.asset_path_zip }}
+          asset_name: ${{ steps.args.outputs.asset_name_zip }}
+          asset_content_type: application/zip
+      - name: Upload TAR.GZ asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.args.outputs.asset_upload_url }}
+          asset_path: ${{ steps.args.outputs.asset_path_tar }}
+          asset_name: ${{ steps.args.outputs.asset_name_tar }}
+          asset_content_type: application/gzip
