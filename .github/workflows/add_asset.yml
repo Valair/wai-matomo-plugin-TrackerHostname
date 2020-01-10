@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v1
       - name: Set env variables
         run: |
-          echo ::set-env name=RELEASE_TAG::$(echo ${{ github.ref }} | cut -c11-)
+          echo ::set-env name=RELEASE_TAG::$(echo $( jq -r '.release.tag_name' $GITHUB_EVENT_PATH ))
           echo ::set-env name=PLUGIN_NAME::$(echo $( jq -r '.name' ${{ github.workspace }}/plugin.json ))
           echo ::set-env name=ASSET_UPLOAD_URL::$(echo $( jq -r '.release.upload_url' $GITHUB_EVENT_PATH ))
       - name: Prepare distribution files
